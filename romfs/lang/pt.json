@@ -38,12 +38,20 @@
             "src": {
                 "title": "Deseja instalar através de onde?",
                 "opt0": "URL",
-                "opt1": "Google Drive"
+                "opt1": "Google Drive",
+                "opt2": "Navegar URL"
             },
             "url": {
                 "hint": "Insira o endereço da Internet para o ficheiro",
                 "invalid": "O URL inserido é inválido!",
                 "source_string": " através do URL"
+            },
+            "browse": {
+                "hint": "Insira um URL para procurar ficheiros instaláveis",
+                "crawling": "A procurar ficheiros instaláveis no URL...",
+                "no_files": "Nenhum ficheiro instalável encontrado",
+                "no_files_desc": "Nenhum ficheiro NSP, NSZ, XCI ou XCZ foi encontrado no URL especificado.",
+                "source_string": " através do URL navegado"
             },
             "gdrive": {
                 "hint": "Insira o ID público do ficheiro do Google Drive",

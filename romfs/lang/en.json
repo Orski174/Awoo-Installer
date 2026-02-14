@@ -38,12 +38,20 @@
             "src": {
                 "title": "Where do you want to install from?",
                 "opt0": "URL",
-                "opt1": "Google Drive"
+                "opt1": "Google Drive",
+                "opt2": "Browse URL"
             },
             "url": {
                 "hint": "Enter the Internet address of a file",
                 "invalid": "The URL specified is invalid!",
                 "source_string": " from URL"
+            },
+            "browse": {
+                "hint": "Enter a URL to browse for installable files",
+                "crawling": "Crawling URL for installable files...",
+                "no_files": "No installable files found",
+                "no_files_desc": "No NSP, NSZ, XCI, or XCZ files were found at the specified URL.",
+                "source_string": " from browsed URL"
             },
             "gdrive": {
                 "hint": "Enter the file ID of a public Google Drive file",

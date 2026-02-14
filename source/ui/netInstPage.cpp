@@ -7,6 +7,7 @@
 #include "util/config.hpp"
 #include "util/curl.hpp"
 #include "util/lang.hpp"
+#include "util/html_util.hpp"
 #include "netInstall.hpp"
 
 #define COLOR(hex) pu::ui::Color::FromHex(hex)
@@ -91,7 +92,7 @@ namespace inst::ui {
             return;
         } else if (this->ourUrls[0] == "supplyUrl") {
             std::string keyboardResult;
-            switch (mainApp->CreateShowDialog("inst.net.src.title"_lang, "common.cancel_desc"_lang, {"inst.net.src.opt0"_lang, "inst.net.src.opt1"_lang}, false)) {
+            switch (mainApp->CreateShowDialog("inst.net.src.title"_lang, "common.cancel_desc"_lang, {"inst.net.src.opt0"_lang, "inst.net.src.opt1"_lang, "inst.net.src.opt2"_lang}, false)) {
                 case 0:
                     keyboardResult = inst::util::softwareKeyboard("inst.net.url.hint"_lang, inst::config::lastNetUrl, 500);
                     if (keyboardResult.size() > 0) {
@@ -117,6 +118,38 @@ namespace inst::ui {
                         sourceString = "inst.net.gdrive.source_string"_lang;
                         this->selectedUrls = {"https://www.googleapis.com/drive/v3/files/" + keyboardResult + "?key=" + inst::config::gAuthKey + "&alt=media"};
                         this->startInstall(true);
+                        return;
+                    }
+                    break;
+                case 2:
+                    keyboardResult = inst::util::softwareKeyboard("inst.net.browse.hint"_lang, inst::config::lastNetUrl, 500);
+                    if (keyboardResult.size() > 0) {
+                        if (inst::util::formatUrlString(keyboardResult) == "" || keyboardResult == "https://" || keyboardResult == "http://") {
+                            mainApp->CreateShowDialog("inst.net.url.invalid"_lang, "", {"common.ok"_lang}, false);
+                            break;
+                        }
+                        inst::config::lastNetUrl = keyboardResult;
+                        inst::config::setConfig();
+                        
+                        this->pageInfoText->SetText("inst.net.browse.crawling"_lang);
+                        mainApp->CallForRender();
+                        
+                        std::vector<std::string> foundFiles = inst::util::crawlForInstallableFiles(keyboardResult, 2);
+                        
+                        if (foundFiles.empty()) {
+                            mainApp->CreateShowDialog("inst.net.browse.no_files"_lang, "inst.net.browse.no_files_desc"_lang, {"common.ok"_lang}, false);
+                            break;
+                        }
+                        
+                        sourceString = "inst.net.browse.source_string"_lang;
+                        this->ourUrls = foundFiles;
+                        this->pageInfoText->SetText("inst.net.top_info"_lang);
+                        this->butText->SetText("inst.net.buttons1"_lang);
+                        this->drawMenuItems(true);
+                        this->menu->SetSelectedIndex(0);
+                        mainApp->CallForRender();
+                        this->infoImage->SetVisible(false);
+                        this->menu->SetVisible(true);
                         return;
                     }
                     break;
