@@ -8,6 +8,9 @@
 
 namespace inst::util {
 
+    constexpr int MAX_CRAWL_RESULTS = 256;
+    constexpr long CRAWL_TIMEOUT_MS = 10000;
+
     std::string urlJoin(const std::string& base, const std::string& relative) {
         if (relative.find("://") != std::string::npos) {
             return relative;
@@ -45,10 +48,12 @@ namespace inst::util {
 
     bool isInstallableFile(const std::string& filename) {
         std::string lower = toLowerCase(filename);
-        return lower.find(".nsp") != std::string::npos || 
-               lower.find(".nsz") != std::string::npos ||
-               lower.find(".xci") != std::string::npos || 
-               lower.find(".xcz") != std::string::npos;
+        size_t len = lower.length();
+        
+        return (len > 4 && lower.substr(len - 4) == ".nsp") || 
+               (len > 4 && lower.substr(len - 4) == ".nsz") ||
+               (len > 4 && lower.substr(len - 4) == ".xci") || 
+               (len > 4 && lower.substr(len - 4) == ".xcz");
     }
 
     std::string extractHrefValue(const std::string& htmlChunk) {
@@ -108,9 +113,9 @@ namespace inst::util {
             LinkInfo info;
             info.url = fullUrl;
             info.displayName = text.empty() ? href : text;
-            info.isDirectory = (href.back() == '/' || 
+            info.isDirectory = (!href.empty() && href.back() == '/') || 
                               (text.find("[DIR]") != std::string::npos) ||
-                              (text.find("Directory") != std::string::npos));
+                              (text.find("Directory") != std::string::npos);
             
             if (!info.isDirectory || isInstallableFile(href)) {
                 info.isDirectory = false;
@@ -129,7 +134,7 @@ namespace inst::util {
         
         toVisit.push_back({url, 0});
         
-        while (!toVisit.empty() && installableFiles.size() < 256) {
+        while (!toVisit.empty() && installableFiles.size() < MAX_CRAWL_RESULTS) {
             auto current = toVisit.back();
             toVisit.pop_back();
             
@@ -142,7 +147,7 @@ namespace inst::util {
             visited.insert(currentUrl);
             
             try {
-                std::string htmlContent = inst::curl::downloadToBuffer(currentUrl, -1, -1, 10000);
+                std::string htmlContent = inst::curl::downloadToBuffer(currentUrl, -1, -1, CRAWL_TIMEOUT_MS);
                 
                 if (htmlContent.empty()) {
                     continue;
@@ -157,7 +162,11 @@ namespace inst::util {
                         toVisit.push_back({link.url, depth + 1});
                     }
                 }
+            } catch (const std::exception& e) {
+                LOG_DEBUG("Failed to crawl URL %s: %s\n", currentUrl.c_str(), e.what());
+                continue;
             } catch (...) {
+                LOG_DEBUG("Unknown error while crawling URL %s\n", currentUrl.c_str());
                 continue;
             }
         }
