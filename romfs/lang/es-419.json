@@ -38,12 +38,20 @@
             "src": {
                 "title": "¿Desde dónde quieres instalar el juego?",
                 "opt0": "URL",
-                "opt1": "Google Drive"
+                "opt1": "Google Drive",
+                "opt2": "Examinar URL"
             },
             "url": {
                 "hint": "Introduce la dirección de Internet de un archivo",
                 "invalid": "¡La URL especificada no es válida!",
                 "source_string": " desde una URL"
+            },
+            "browse": {
+                "hint": "Introduce una URL para buscar archivos instalables",
+                "crawling": "Buscando archivos instalables en la URL...",
+                "no_files": "No se encontraron archivos instalables",
+                "no_files_desc": "No se encontraron archivos NSP, NSZ, XCI o XCZ en la URL especificada.",
+                "source_string": " desde URL examinada"
             },
             "gdrive": {
                 "hint": "Introduce la ID de un archivo público de Google Drive",

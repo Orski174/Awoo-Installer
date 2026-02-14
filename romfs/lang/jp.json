@@ -38,12 +38,20 @@
             "src": {
                 "title": "どこからインストールしますか？",
                 "opt0": "URL",
-                "opt1": "Googleドライブ"
+                "opt1": "Googleドライブ",
+                "opt2": "URLを閲覧"
             },
             "url": {
                 "hint": "ファイルのインターネットアドレスを入力してください",
                 "invalid": "指定されたURLは無効です！",
                 "source_string": " URLから"
+            },
+            "browse": {
+                "hint": "インストール可能なファイルを検索するURLを入力してください",
+                "crawling": "URLからインストール可能なファイルを検索しています...",
+                "no_files": "インストール可能なファイルが見つかりませんでした",
+                "no_files_desc": "指定されたURLにNSP、NSZ、XCI、またはXCZファイルが見つかりませんでした。",
+                "source_string": " 閲覧したURLから"
             },
             "gdrive": {
                 "hint": "Googleドライブの公開ファイルのファイルIDを入力してください",
