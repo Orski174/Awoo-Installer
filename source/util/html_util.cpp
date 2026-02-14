@@ -3,8 +3,8 @@
 #include "util/error.hpp"
 #include <algorithm>
 #include <cctype>
-#include <regex>
 #include <set>
+#include <sstream>
 
 namespace inst::util {
 
@@ -51,20 +51,47 @@ namespace inst::util {
                lower.find(".xcz") != std::string::npos;
     }
 
+    std::string extractHrefValue(const std::string& htmlChunk) {
+        size_t hrefPos = htmlChunk.find("href");
+        if (hrefPos == std::string::npos) return "";
+        
+        size_t quoteStart = htmlChunk.find_first_of("\"'", hrefPos);
+        if (quoteStart == std::string::npos) return "";
+        
+        char quoteChar = htmlChunk[quoteStart];
+        size_t quoteEnd = htmlChunk.find(quoteChar, quoteStart + 1);
+        if (quoteEnd == std::string::npos) return "";
+        
+        return htmlChunk.substr(quoteStart + 1, quoteEnd - quoteStart - 1);
+    }
+
+    std::string extractLinkText(const std::string& htmlChunk) {
+        size_t closingTag = htmlChunk.find('>');
+        if (closingTag == std::string::npos) return "";
+        
+        size_t endTag = htmlChunk.find("</a>", closingTag);
+        if (endTag == std::string::npos) return "";
+        
+        return htmlChunk.substr(closingTag + 1, endTag - closingTag - 1);
+    }
+
     std::vector<LinkInfo> parseHTMLLinks(const std::string& htmlContent, const std::string& baseUrl) {
         std::vector<LinkInfo> links;
         std::set<std::string> seenUrls;
         
-        std::regex hrefRegex(R"(<a[^>]+href\s*=\s*['\"]([^'\"]+)['\"][^>]*>([^<]*)</a>)", 
-                            std::regex::icase);
-        
-        auto begin = std::sregex_iterator(htmlContent.begin(), htmlContent.end(), hrefRegex);
-        auto end = std::sregex_iterator();
-        
-        for (std::sregex_iterator i = begin; i != end; ++i) {
-            std::smatch match = *i;
-            std::string href = match[1].str();
-            std::string text = match[2].str();
+        size_t pos = 0;
+        while (pos < htmlContent.length()) {
+            size_t aTagStart = htmlContent.find("<a", pos);
+            if (aTagStart == std::string::npos) break;
+            
+            size_t aTagEnd = htmlContent.find("</a>", aTagStart);
+            if (aTagEnd == std::string::npos) break;
+            
+            std::string aTag = htmlContent.substr(aTagStart, aTagEnd - aTagStart + 4);
+            std::string href = extractHrefValue(aTag);
+            std::string text = extractLinkText(aTag);
+            
+            pos = aTagEnd + 4;
             
             if (href.empty() || href == "#" || href.find("javascript:") == 0 || 
                 href.find("mailto:") == 0 || href == "../" || href == "./") {
